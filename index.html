@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="A starter website for a Deriv-powered trading experience."
+    />
+    <title>Northstar Markets | A smarter trading experience</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <script src="/app.js" defer></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="/" aria-label="Northstar Markets home">
+        <span class="brand-mark" aria-hidden="true">N</span>
+        <span>northstar<span class="brand-light">markets</span></span>
+      </a>
+      <a class="header-link" href="#how-it-works">How it works</a>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow"><span class="status-dot"></span> YOUR MARKETS, YOUR WAY</p>
+          <h1>A clearer way to explore the markets.</h1>
+          <p class="hero-description">
+            A focused trading experience, built to help you find your way around
+            the markets and manage your account in one place.
+          </p>
+          <a class="primary-button" href="#get-started">
+            Get started <span aria-hidden="true">↗</span>
+          </a>
+          <p class="fine-print">A prototype experience. Sign-in is not enabled yet.</p>
+        </div>
+        <div class="market-card" aria-label="Market overview illustration">
+          <div class="market-card-top">
+            <span>MARKET OVERVIEW</span>
+            <span class="live-label"><span class="status-dot"></span> SAMPLE DATA</span>
+          </div>
+          <div class="chart-label">
+            <span>Volatility Index</span>
+            <span class="chart-change">Illustrative +1.28%</span>
+          </div>
+          <svg
+            class="chart"
+            viewBox="0 0 520 190"
+            role="img"
+            aria-label="Illustrative rising market line"
+            preserveAspectRatio="none"
+          >
+            <defs>
+              <linearGradient id="chart-fill" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0%" stop-color="#91f1c3" stop-opacity=".2" />
+                <stop offset="100%" stop-color="#91f1c3" stop-opacity="0" />
+              </linearGradient>
+            </defs>
+            <path
+              d="M0 150 C30 145 38 111 70 122 S105 141 135 104 175 112 205 85 235 105 269 70 306 89 337 59 372 76 405 42 445 55 477 28 500 43 520 18 V190 H0Z"
+              fill="url(#chart-fill)"
+            />
+            <path
+              d="M0 150 C30 145 38 111 70 122 S105 141 135 104 175 112 205 85 235 105 269 70 306 89 337 59 372 76 405 42 445 55 477 28 500 43 520 18"
+              fill="none"
+              stroke="#91f1c3"
+              stroke-width="3"
+              vector-effect="non-scaling-stroke"
+            />
+          </svg>
+          <div class="chart-times" aria-hidden="true">
+            <span>09:00</span><span>12:00</span><span>15:00</span><span>18:00</span>
+          </div>
+          <p class="illustration-note">Illustrative chart · not live prices</p>
+        </div>
+      </section>
+
+      <section class="features" id="how-it-works">
+        <div class="section-heading">
+          <p class="eyebrow">BUILT AROUND YOU</p>
+          <h2>Trading, without the clutter.</h2>
+        </div>
+        <div class="feature-grid">
+          <article class="feature">
+            <span class="feature-icon" aria-hidden="true">↗</span>
+            <h3>Market access</h3>
+            <p>Explore supported markets through a streamlined experience.</p>
+          </article>
+          <article class="feature">
+            <span class="feature-icon" aria-hidden="true">◎</span>
+            <h3>Your account, connected</h3>
+            <p>Sign in with Deriv when account connection is configured.</p>
+          </article>
+          <article class="feature">
+            <span class="feature-icon" aria-hidden="true">⌁</span>
+            <h3>Designed for clarity</h3>
+            <p>Keep key information easy to find on desktop and mobile.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="connect-panel" id="get-started">
+        <div>
+          <p class="eyebrow">EARLY ACCESS</p>
+          <h2>We’re getting things ready.</h2>
+          <p>
+            Deriv sign-in will be added after the app is registered and its
+            permissions are configured.
+          </p>
+        </div>
+        <span class="setup-badge">Setup in progress</span>
+      </section>
+
+      <p class="risk-note">
+        Trading involves risk and may not be suitable for everyone. You may lose
+        some or all of your investment. This website is an independent prototype
+        and is not affiliated with Deriv.
+      </p>
+      <section class="callback-message" id="callback-message" aria-live="polite" hidden></section>
+    </main>
+
+    <footer>
+      <a class="brand footer-brand" href="/">
+        <span class="brand-mark" aria-hidden="true">N</span>
+        <span>northstar<span class="brand-light">markets</span></span>
+      </a>
+      <span>Independent prototype · Trading involves risk</span>
+    </footer>
+  </body>
+</html>
