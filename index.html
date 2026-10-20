@@ -7,15 +7,15 @@
       name="description"
       content="A starter website for a Deriv-powered trading experience."
     />
-    <title>Northstar Markets | A smarter trading experience</title>
+    <title>Vortextreder | Deriv Options</title>
     <link rel="stylesheet" href="/styles.css" />
     <script src="/app.js" defer></script>
   </head>
   <body>
     <header class="site-header">
-      <a class="brand" href="/" aria-label="Northstar Markets home">
-        <span class="brand-mark" aria-hidden="true">N</span>
-        <span>northstar<span class="brand-light">markets</span></span>
+      <a class="brand" href="/" aria-label="Vortextreder home">
+        <span class="brand-mark" aria-hidden="true">V</span>
+        <span>vortex<span class="brand-light">treder</span></span>
       </a>
       <a class="header-link" href="#how-it-works">How it works</a>
     </header>
@@ -26,13 +26,13 @@
           <p class="eyebrow"><span class="status-dot"></span> YOUR MARKETS, YOUR WAY</p>
           <h1>A clearer way to explore the markets.</h1>
           <p class="hero-description">
-            A focused trading experience, built to help you find your way around
-            the markets and manage your account in one place.
+            View your Deriv Options accounts, request live quotes, and place
+            trades with a clear choice between demo and real funds.
           </p>
           <a class="primary-button" href="#get-started">
             Get started <span aria-hidden="true">↗</span>
           </a>
-          <p class="fine-print">A prototype experience. Connect Deriv below to test secure sign-in.</p>
+          <p class="fine-print">The chart is illustrative. Live quotes are requested from Deriv after sign-in.</p>
         </div>
         <div class="market-card" aria-label="Market overview illustration">
           <div class="market-card-top">
@@ -83,8 +83,8 @@
         <div class="feature-grid">
           <article class="feature">
             <span class="feature-icon" aria-hidden="true">↗</span>
-            <h3>Market access</h3>
-            <p>Explore supported markets through a streamlined experience.</p>
+            <h3>Live Deriv quotes</h3>
+            <p>Choose an open Options market and review a current Deriv quote before each order.</p>
           </article>
           <article class="feature">
             <span class="feature-icon" aria-hidden="true">◎</span>
@@ -101,11 +101,11 @@
 
       <section class="connect-panel" id="get-started">
         <div>
-          <p class="eyebrow">EARLY ACCESS</p>
-          <h2>Connect your Deriv account.</h2>
+          <p class="eyebrow">YOUR DERIV ACCOUNT</p>
+          <h2>Connect to view your accounts.</h2>
           <p>
-            Sign in securely with Deriv to test account authorization. This
-            prototype does not place trades or retain your access token.
+            Sign in with Deriv to view your own demo and real Options accounts
+            and request live quotes. Your password stays with Deriv.
           </p>
         </div>
         <button class="primary-button connect-button" id="connect-deriv" type="button">
@@ -113,20 +113,117 @@
         </button>
       </section>
 
+      <section class="dashboard-panel" id="account-dashboard" hidden>
+        <div class="dashboard-heading">
+          <div>
+            <p class="eyebrow">ACCOUNT OVERVIEW</p>
+            <h2>Your Deriv accounts</h2>
+            <p class="muted-copy">
+              Only accounts belonging to the Deriv user who signed in are shown here.
+            </p>
+          </div>
+          <button class="secondary-button" id="disconnect-deriv" type="button">Sign out</button>
+        </div>
+
+        <div class="account-controls">
+          <label class="field">
+            <span>Choose an account</span>
+            <select id="account-select" aria-describedby="account-note"></select>
+          </label>
+          <p class="account-note" id="account-note" aria-live="polite">
+            Account access is provided by Deriv and can be revoked from your Deriv account.
+          </p>
+        </div>
+
+        <section class="trade-panel" id="trading-panel" aria-labelledby="trading-title">
+          <div class="dashboard-heading trade-heading">
+            <div>
+              <p class="eyebrow">OPTIONS TRADING</p>
+              <h2 id="trading-title">Request a live quote</h2>
+              <p class="muted-copy">
+                Review the quote before placing an order. Quotes can change quickly.
+              </p>
+            </div>
+            <span class="connection-status" id="market-status">Connecting to Deriv markets…</span>
+          </div>
+
+          <div class="trade-fields">
+            <label class="field">
+              <span>Market</span>
+              <select id="market-select" disabled>
+                <option>Loading live markets…</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Contract</span>
+              <select id="contract-select">
+                <option value="CALL">Rise</option>
+                <option value="PUT">Fall</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Duration (ticks)</span>
+              <input id="duration-input" type="number" min="5" max="1000" step="1" value="5" required />
+            </label>
+            <label class="field">
+              <span>Stake (<span id="currency-label">account currency</span>)</span>
+              <input id="stake-input" type="number" min="0.01" max="10000" step="0.01" value="1" required />
+            </label>
+          </div>
+
+          <div class="trade-actions">
+            <button class="primary-button" id="quote-button" type="button" disabled>
+              Get live quote
+            </button>
+            <button class="secondary-button" id="buy-button" type="button" disabled>
+              Place order
+            </button>
+          </div>
+          <p class="real-account-warning" id="real-account-warning" hidden>
+            Real account selected. Placing an order uses real funds. Vortextreder's configured
+            3% markup can reduce a winning payout; review Deriv's quote before each order.
+          </p>
+          <p class="uncertain-order-warning" id="uncertain-order-warning" hidden>
+            Deriv did not confirm an earlier order. Check this account's Deriv contract
+            history before continuing.
+            <button class="secondary-button" id="resolve-uncertain-order" type="button">
+              I checked Deriv; unlock this account
+            </button>
+          </p>
+
+          <section class="quote-card" id="quote-card" aria-live="polite" hidden>
+            <h3>Deriv quote</h3>
+            <p id="quote-description"></p>
+            <dl class="quote-details">
+              <div><dt>Maximum purchase price</dt><dd id="quote-price"></dd></div>
+              <div><dt>Potential payout</dt><dd id="quote-payout"></dd></div>
+              <div><dt>Quote expires</dt><dd id="quote-expiry"></dd></div>
+            </dl>
+            <p class="fine-print">
+              The payout is not guaranteed. A losing trade can lose the full stake.
+              The app's 3% markup is configured by Deriv and reflected in its quote.
+            </p>
+          </section>
+          <p class="trade-message" id="trade-message" role="status" aria-live="polite" hidden></p>
+        </section>
+      </section>
+
       <p class="risk-note">
         Trading involves risk and may not be suitable for everyone. You may lose
-        some or all of your investment. This website is an independent prototype
-        and is not affiliated with Deriv.
+        some or all of your stake. Real-account orders spend real funds. This is
+        an independent third-party app and is not affiliated with Deriv. The
+        account controls here only show accounts that the signed-in user has
+        authorized; the app owner cannot manage other users' Deriv accounts.
       </p>
       <section class="callback-message" id="callback-message" aria-live="polite" role="status" hidden></section>
     </main>
 
     <footer>
       <a class="brand footer-brand" href="/">
-        <span class="brand-mark" aria-hidden="true">N</span>
-        <span>northstar<span class="brand-light">markets</span></span>
+        <span class="brand-mark" aria-hidden="true">V</span>
+        <span>vortex<span class="brand-light">treder</span></span>
       </a>
-      <span>Independent prototype · Trading involves risk</span>
+      <span>Independent third-party app · Trading involves risk</span>
     </footer>
   </body>
 </html>

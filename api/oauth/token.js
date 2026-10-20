@@ -3,6 +3,7 @@ const {
   redirectUri,
   tokenEndpoint,
 } = require("../../oauth-config");
+const { getSessionKey, sealSession, sessionCookie } = require("../../lib/session");
 
 const allowedLocalOrigins = new Set([
   "http://localhost:4173",
@@ -27,6 +28,8 @@ function createTokenHandler({
   expectedClientId = clientId,
   expectedRedirectUri = redirectUri,
   tokenUrl = tokenEndpoint,
+  sessionKey,
+  secureCookies = process.env.NODE_ENV === "production",
 } = {}) {
   const allowedOrigins = new Set([new URL(expectedRedirectUri).origin]);
   if (process.env.NODE_ENV !== "production") {
@@ -70,6 +73,16 @@ function createTokenHandler({
       return;
     }
 
+    let encryptionKey;
+    try {
+      encryptionKey = getSessionKey(sessionKey);
+    } catch {
+      sendJson(response, 503, {
+        error: "Secure sign-in is not configured on this site yet. Please try again later.",
+      });
+      return;
+    }
+
     const form = new URLSearchParams({
       grant_type: "authorization_code",
       client_id: expectedClientId,
@@ -101,10 +114,33 @@ function createTokenHandler({
         return;
       }
 
+      const expiresIn =
+        tokenResponse.expires_in === undefined ? 3600 : Number(tokenResponse.expires_in);
+      if (!Number.isFinite(expiresIn) || expiresIn < 60) {
+        sendJson(response, 502, { error: "Deriv returned an invalid token expiry." });
+        return;
+      }
+
+      try {
+        const session = sealSession(
+          tokenResponse.access_token,
+          Math.min(expiresIn, 3600),
+          encryptionKey,
+        );
+        response.setHeader(
+          "Set-Cookie",
+          sessionCookie(session.value, session.maxAge, secureCookies),
+        );
+      } catch {
+        sendJson(response, 502, {
+          error: "A secure sign-in session could not be created. Please try again.",
+        });
+        return;
+      }
+
       sendJson(response, 200, {
         authenticated: true,
-        message:
-          "Deriv authorization succeeded. This prototype does not retain tokens or enable trading.",
+        message: "Deriv is connected. Your access token is encrypted in a short-lived, HttpOnly session.",
       });
     } catch {
       sendJson(response, 502, { error: "Deriv sign-in is temporarily unavailable." });

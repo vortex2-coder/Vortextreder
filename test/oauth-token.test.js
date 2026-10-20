@@ -1,6 +1,7 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const { createTokenHandler } = require("../api/oauth/token");
+const { getSessionKey, readSession } = require("../lib/session");
 
 function createResponse() {
   return {
@@ -29,6 +30,7 @@ const config = {
   expectedClientId: "test-client",
   expectedRedirectUri: "https://app.example/callback",
   tokenUrl: "https://auth.example/oauth2/token",
+  sessionKey: Buffer.alloc(32, 7).toString("base64"),
 };
 const validBody = {
   code: "one-time-code",
@@ -57,7 +59,7 @@ test("rejects missing, malformed, or non-POST requests", async () => {
   assert.equal(invalidResponse.statusCode, 400);
 });
 
-test("exchanges the code with Deriv and never returns or stores tokens", async () => {
+test("exchanges the code and stores tokens only in an encrypted HttpOnly cookie", async () => {
   let upstreamRequest;
   const handler = createTokenHandler({
     ...config,
@@ -80,9 +82,17 @@ test("exchanges the code with Deriv and never returns or stores tokens", async (
   assert.deepEqual(response.body, {
     authenticated: true,
     message:
-      "Deriv authorization succeeded. This prototype does not retain tokens or enable trading.",
+      "Deriv is connected. Your access token is encrypted in a short-lived, HttpOnly session.",
   });
   assert.equal(JSON.stringify(response.body).includes("sensitive"), false);
+  assert.match(response.headers["Set-Cookie"], /HttpOnly/);
+  assert.match(response.headers["Set-Cookie"], /SameSite=Lax/);
+  assert.equal(response.headers["Set-Cookie"].includes("sensitive-access-token"), false);
+  const cookie = response.headers["Set-Cookie"].split(";")[0];
+  assert.equal(
+    readSession({ headers: { cookie } }, getSessionKey(config.sessionKey)).accessToken,
+    "sensitive-access-token",
+  );
   assert.equal(upstreamRequest.url, config.tokenUrl);
   assert.equal(upstreamRequest.options.method, "POST");
   assert.equal(
@@ -122,4 +132,22 @@ test("rejects a successful but malformed token response", async () => {
 
   assert.equal(response.statusCode, 502);
   assert.deepEqual(response.body, { error: "Deriv returned an invalid token response." });
+});
+
+test("does not consume an OAuth code if secure session configuration is missing", async () => {
+  let exchanged = false;
+  const handler = createTokenHandler({
+    ...config,
+    sessionKey: "",
+    fetchImpl: async () => {
+      exchanged = true;
+      throw new Error("Should not exchange");
+    },
+  });
+  const response = createResponse();
+
+  await handler(createRequest({ body: validBody }), response);
+
+  assert.equal(response.statusCode, 503);
+  assert.equal(exchanged, false);
 });
