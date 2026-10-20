@@ -16,6 +16,7 @@ const files = {
   "/index.html": ["index.html", "text/html; charset=utf-8"],
   "/styles.css": ["styles.css", "text/css; charset=utf-8"],
   "/app.js": ["app.js", "text/javascript; charset=utf-8"],
+  "/analytics.js": ["analytics.js", "text/javascript; charset=utf-8"],
 };
 
 const tokenHandler = createTokenHandler({
@@ -75,5 +76,5 @@ const server = http.createServer(async (request, response) => {
 
 const port = Number(process.env.PORT || 4173);
 server.listen(port, "127.0.0.1", () => {
-  console.log(`Northstar Markets is running at http://localhost:${port}`);
+  console.log(`Vortextreder is running at http://localhost:${port}`);
 });

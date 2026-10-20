@@ -25,6 +25,8 @@ let socketConnection;
 let requestId = 0;
 let currentQuote;
 let quoteTimer;
+let analysisSocket;
+let observedTicks = [];
 const pendingRequests = new Map();
 let uncertainAccounts = new Set();
 try {
@@ -191,6 +193,10 @@ function setAccountDetails() {
       ? ` · Balance ${formatCurrency(account.balance, account.currency)}`
       : "";
   accountNote.textContent = `${typeLabel} · ${account.currency} · ${account.id}${balanceText}`;
+  document.querySelector("#builder-currency").textContent = account.currency;
+  document.querySelectorAll(".risk-currency").forEach((element) => {
+    element.textContent = account.currency;
+  });
   realAccountWarning.hidden = account.type !== "real";
   const accountIsLocked = uncertainAccounts.has(account.id);
   uncertainOrderWarning.hidden = !accountIsLocked;
@@ -215,6 +221,273 @@ function formatCurrency(amount, currency) {
     }).format(amount);
   } catch {
     return `${amount} ${currency}`;
+  }
+}
+
+function setTerminalView(view) {
+  const allowedViews = new Set(["trade", "analytics", "strategies", "builder", "speed", "risk", "learn"]);
+  if (!allowedViews.has(view)) return;
+  document.querySelectorAll(".terminal-tab").forEach((button) => {
+    const isActive = button.dataset.view === view;
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-pressed", String(isActive));
+  });
+  document.querySelectorAll("[data-panel]").forEach((panel) => {
+    panel.hidden = panel.dataset.panel !== view;
+  });
+  if (view === "analytics" || view === "speed") renderMarketAnalysis();
+  if (view === "risk") renderRiskPlan();
+  if (view === "builder") renderSavedStrategies();
+}
+
+function renderSavedStrategies() {
+  const container = document.querySelector("#saved-strategies");
+  container.replaceChildren();
+  let saved;
+  try {
+    saved = JSON.parse(window.localStorage.getItem("vortextreder.saved-strategies") || "[]");
+  } catch {
+    document.querySelector("#builder-feedback").textContent =
+      "Saved strategies could not be read from this browser.";
+    return;
+  }
+  if (!Array.isArray(saved)) {
+    document.querySelector("#builder-feedback").textContent =
+      "Saved strategy data is invalid. Save a new strategy to replace it.";
+    return;
+  }
+  if (saved.length === 0) {
+    container.textContent = "No saved strategies yet.";
+    return;
+  }
+  const validStrategies = saved.slice(-20).filter(
+    (strategy) =>
+      strategy &&
+      typeof strategy.name === "string" &&
+      ["CALL", "PUT"].includes(strategy.contract) &&
+      Number.isInteger(strategy.duration) &&
+      Number.isFinite(strategy.stake),
+  );
+  if (validStrategies.length !== saved.slice(-20).length) {
+    document.querySelector("#builder-feedback").textContent =
+      "Some saved entries were invalid and have been omitted.";
+  }
+  for (const strategy of validStrategies) {
+    const card = document.createElement("article");
+    card.className = "saved-strategy";
+    const name = document.createElement("strong");
+    name.textContent = strategy.name;
+    const detail = document.createElement("span");
+    detail.textContent =
+      `${strategy.contract === "CALL" ? "Rise" : "Fall"} · ${strategy.duration} ticks · ${formatCurrency(strategy.stake, selectedAccount()?.currency || "USD")}`;
+    const load = document.createElement("button");
+    load.className = "secondary-button";
+    load.type = "button";
+    load.dataset.savedStrategy = strategy.name;
+    load.textContent = "Load settings";
+    card.append(name, detail, load);
+    container.append(card);
+  }
+}
+
+function renderMarketAnalysis() {
+  if (!window.VortextrederAnalytics) return;
+  const threshold = Number(document.querySelector("#digit-threshold").value);
+  const market = marketSelect.options[marketSelect.selectedIndex]?.textContent || "selected market";
+  const analysis = window.VortextrederAnalytics.analyzeTicks(observedTicks, 2, threshold);
+  document.querySelector("#analysis-status").textContent =
+    observedTicks.length ? `Live · ${market}` : `Waiting for ticks · ${market}`;
+  document.querySelector("#analysis-tick-count").textContent = String(analysis.total);
+  document.querySelector("#replay-tick-count").textContent = String(analysis.total);
+  document.querySelector("#analysis-price").textContent = analysis.prices.length
+    ? analysis.prices.at(-1).toFixed(analysis.pipSize)
+    : "—";
+  document.querySelector("#analysis-current-digit").textContent =
+    analysis.currentDigit === null ? "—" : String(analysis.currentDigit);
+  document.querySelector("#run-replay").disabled = analysis.total < 3;
+
+  const bars = document.querySelector("#digit-bars");
+  bars.replaceChildren();
+  analysis.percentages.forEach((percentage, digit) => {
+    const item = document.createElement("div");
+    item.className = "digit-bar-row";
+    const label = document.createElement("span");
+    label.textContent = String(digit);
+    const track = document.createElement("span");
+    track.className = "digit-bar-track";
+    const fill = document.createElement("span");
+    fill.className = digit === analysis.currentDigit ? "digit-bar-fill is-current" : "digit-bar-fill";
+    fill.style.width = `${percentage}%`;
+    track.append(fill);
+    const value = document.createElement("span");
+    value.textContent = `${percentage.toFixed(1)}%`;
+    item.setAttribute("aria-label", `Digit ${digit}: ${percentage.toFixed(1)} percent`);
+    item.append(label, track, value);
+    bars.append(item);
+  });
+  document.querySelector("#digit-extremes").textContent = analysis.total
+    ? `Most frequent: ${analysis.highest.digit} (${analysis.percentages[analysis.highest.digit].toFixed(1)}%) · Least frequent: ${analysis.lowest.digit} (${analysis.percentages[analysis.lowest.digit].toFixed(1)}%)`
+    : "Waiting for live market data.";
+  document.querySelector("#even-percent").textContent = analysis.total
+    ? `${((analysis.even / analysis.total) * 100).toFixed(1)}%`
+    : "—";
+  document.querySelector("#odd-percent").textContent = analysis.total
+    ? `${((analysis.odd / analysis.total) * 100).toFixed(1)}%`
+    : "—";
+  document.querySelector("#over-percent").textContent = analysis.total
+    ? `${((analysis.over / analysis.total) * 100).toFixed(1)}%`
+    : "—";
+  document.querySelector("#under-percent").textContent = analysis.total
+    ? `${((analysis.under / analysis.total) * 100).toFixed(1)}%`
+    : "—";
+  document.querySelector("#over-label").textContent = `Over ${threshold}`;
+  document.querySelector("#under-label").textContent = `${threshold} or under`;
+
+  const stream = document.querySelector("#digit-stream");
+  stream.replaceChildren();
+  for (const digit of analysis.last) {
+    const item = document.createElement("span");
+    item.className = digit % 2 === 0 ? "stream-digit is-even" : "stream-digit is-odd";
+    item.textContent = String(digit);
+    stream.append(item);
+  }
+
+  const chart = document.querySelector("#live-chart");
+  chart.replaceChildren();
+  if (analysis.prices.length > 1) {
+    const min = Math.min(...analysis.prices);
+    const max = Math.max(...analysis.prices);
+    const range = max - min || 1;
+    const points = analysis.prices
+      .map((price, index) => {
+        const x = (index / (analysis.prices.length - 1)) * 620 + 10;
+        const y = 165 - ((price - min) / range) * 145;
+        return `${x.toFixed(1)},${y.toFixed(1)}`;
+      })
+      .join(" ");
+    const line = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
+    line.setAttribute("points", points);
+    line.setAttribute("fill", "none");
+    line.setAttribute("stroke", "#49c58b");
+    line.setAttribute("stroke-width", "2");
+    line.setAttribute("vector-effect", "non-scaling-stroke");
+    chart.append(line);
+  }
+}
+
+function startMarketStream() {
+  if (!marketSelect.value) return;
+  if (analysisSocket) {
+    analysisSocket.onmessage = null;
+    analysisSocket.onerror = null;
+    analysisSocket.onclose = null;
+    analysisSocket.close();
+  }
+  observedTicks = [];
+  renderMarketAnalysis();
+  const socket = new WebSocket("wss://api.derivws.com/trading/v1/options/ws/public");
+  analysisSocket = socket;
+  socket.onopen = () => {
+    socket.send(JSON.stringify({ ticks: marketSelect.value, subscribe: 1, req_id: 902 }));
+  };
+  socket.onmessage = (event) => {
+    let message;
+    try {
+      message = JSON.parse(event.data);
+    } catch {
+      document.querySelector("#analysis-status").textContent = "Deriv returned unreadable market data.";
+      return;
+    }
+    if (message.error) {
+      document.querySelector("#analysis-status").textContent =
+        message.error.message || "Deriv could not stream market data.";
+      return;
+    }
+    if (message.msg_type !== "tick" || !Number.isFinite(Number(message.tick?.quote))) return;
+    const tick = {
+      quote: Number(message.tick.quote),
+      pip_size: Number.isInteger(message.tick.pip_size) ? message.tick.pip_size : 2,
+    };
+    observedTicks.push(tick);
+    if (observedTicks.length > 1000) observedTicks.shift();
+    renderMarketAnalysis();
+  };
+  socket.onerror = () => {
+    if (analysisSocket === socket) {
+      document.querySelector("#analysis-status").textContent = "Live market stream is unavailable.";
+    }
+  };
+}
+
+function renderRiskPlan() {
+  if (!window.VortextrederAnalytics) return;
+  const showRiskError = (message) => {
+    for (const selector of ["#risk-starting-stake", "#risk-stop-loss", "#risk-take-profit"]) {
+      document.querySelector(selector).textContent = "—";
+    }
+    document.querySelector("#risk-ladder").textContent = message;
+  };
+  const form = document.querySelector("#risk-form");
+  if (!form.checkValidity()) {
+    showRiskError("Enter valid values within the limits shown.");
+    return;
+  }
+  const balance = Number(document.querySelector("#risk-balance").value);
+  const riskPercent = Number(document.querySelector("#risk-percent").value);
+  const lossCount = Number(document.querySelector("#risk-loss-count").value);
+  const martingale = Number(document.querySelector("#risk-martingale").value);
+  const takeProfitPercent = Number(document.querySelector("#risk-take-profit-percent").value);
+  if (
+    ![balance, riskPercent, lossCount, martingale, takeProfitPercent].every(Number.isFinite) ||
+    balance <= 0 ||
+    riskPercent < 1 ||
+    riskPercent > 50 ||
+    lossCount < 1 ||
+    lossCount > 10 ||
+    martingale < 1 ||
+    martingale > 2 ||
+    takeProfitPercent < 1 ||
+    takeProfitPercent > 100
+  ) {
+    showRiskError("Enter values within the displayed limits.");
+    return;
+  }
+  const account = selectedAccount();
+  const currency = account?.currency || "USD";
+  let plan;
+  try {
+    plan = window.VortextrederAnalytics.calculateRiskPlan({
+      balance,
+      riskPercent,
+      martingale,
+      lossCount,
+      takeProfitPercent,
+    });
+  } catch (error) {
+    showRiskError(
+      error instanceof RangeError
+        ? error.message
+        : "Could not calculate this risk plan from the supplied values.",
+    );
+    return;
+  }
+  document.querySelector("#risk-starting-stake").textContent =
+    formatCurrency(plan.startingStake, currency);
+  document.querySelector("#risk-stop-loss").textContent = formatCurrency(plan.stopLoss, currency);
+  document.querySelector("#risk-take-profit").textContent =
+    formatCurrency(plan.takeProfit, currency);
+  const ladder = document.querySelector("#risk-ladder");
+  ladder.replaceChildren();
+  for (const row of plan.stakes) {
+    const item = document.createElement("div");
+    const step = document.createElement("span");
+    step.textContent = `#${row.loss}`;
+    const stake = document.createElement("span");
+    stake.textContent = formatCurrency(row.stake, currency);
+    const cumulative = document.createElement("span");
+    cumulative.textContent = `${formatCurrency(row.cumulative, currency)} total`;
+    item.append(step, stake, cumulative);
+    ladder.append(item);
   }
 }
 
@@ -251,6 +524,9 @@ function displayAccounts(list) {
       "No active Options accounts are available. Check your Deriv account before trading.";
   } else {
     setAccountDetails();
+    if (selectedAccount()?.balance > 0) {
+      document.querySelector("#risk-balance").value = String(selectedAccount().balance);
+    }
   }
 }
 
@@ -465,6 +741,7 @@ async function loadMarkets() {
     marketSelect.disabled = false;
     marketStatus.textContent = "Live markets loaded";
     quoteButton.disabled = !selectedAccount();
+    startMarketStream();
   } catch (error) {
     marketStatus.textContent = error.message;
     showMessage(error.message, true);
@@ -643,12 +920,20 @@ async function signOut() {
   try {
     await requestJson("/api/account", { method: "DELETE" });
     closeActiveSocket();
+    if (analysisSocket) {
+      analysisSocket.onmessage = null;
+      analysisSocket.onerror = null;
+      analysisSocket.onclose = null;
+      analysisSocket.close();
+      analysisSocket = undefined;
+    }
     accounts = [];
     dashboard.hidden = true;
     connectButton.closest(".connect-panel").hidden = false;
     connectButton.disabled = false;
     accountSelect.replaceChildren();
     resetQuote();
+    setTerminalView("trade");
     showMessage(
       "You have signed out of Vortextreder. To connect a different Deriv profile, also sign out of Deriv in this browser, then connect again. To revoke this app's access entirely, remove it from your Deriv account settings.",
     );
@@ -664,6 +949,116 @@ connectButton.addEventListener("click", () => {
 });
 document.querySelector("#disconnect-deriv").addEventListener("click", signOut);
 accountSelect.addEventListener("change", setAccountDetails);
+document.querySelectorAll(".terminal-tab").forEach((button) => {
+  button.addEventListener("click", () => setTerminalView(button.dataset.view));
+});
+document.querySelectorAll("[data-open-view]").forEach((button) => {
+  button.addEventListener("click", () => setTerminalView(button.dataset.openView));
+});
+document.querySelectorAll(".strategy-load").forEach((button) => {
+  button.addEventListener("click", () => {
+    document.querySelector("#contract-select").value = button.dataset.contract;
+    document.querySelector("#duration-input").value = button.dataset.duration;
+    document.querySelector("#stake-input").value = "1";
+    resetQuote();
+    setTerminalView("trade");
+    document.querySelector("#trading-panel").scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+});
+marketSelect.addEventListener("change", startMarketStream);
+document.querySelector("#digit-threshold").addEventListener("change", renderMarketAnalysis);
+document.querySelector("#risk-form").addEventListener("input", renderRiskPlan);
+document.querySelector("#use-account-balance").addEventListener("click", () => {
+  const account = selectedAccount();
+  if (!account || !Number.isFinite(account.balance) || account.balance <= 0) {
+    document.querySelector("#risk-ladder").textContent =
+      "A current balance is not available. Enter your balance manually.";
+    return;
+  }
+  document.querySelector("#risk-balance").value = String(account.balance);
+  renderRiskPlan();
+});
+document.querySelector("#run-replay").addEventListener("click", () => {
+  const result = window.VortextrederAnalytics.replayDirection(observedTicks);
+  document.querySelector("#replay-wins").textContent = String(result.wins);
+  document.querySelector("#replay-losses").textContent = String(result.losses);
+  document.querySelector("#replay-rate").textContent = `${result.winRate.toFixed(1)}%`;
+  document.querySelector("#replay-feedback").textContent =
+    `${result.total} adjacent-tick direction comparisons. This is a historical descriptive statistic, not a prediction or profitability estimate.`;
+});
+document.querySelector("#strategy-form").addEventListener("submit", (event) => {
+  event.preventDefault();
+  const settings = {
+    name: document.querySelector("#strategy-name").value.trim(),
+    contract: document.querySelector("#builder-contract").value,
+    duration: Number(document.querySelector("#builder-duration").value),
+    stake: Number(document.querySelector("#builder-stake").value),
+    demoOnly: document.querySelector("#builder-demo-only").checked,
+  };
+  if (
+    !settings.name ||
+    !Number.isInteger(settings.duration) ||
+    settings.duration < 5 ||
+    settings.duration > 1000 ||
+    !Number.isFinite(settings.stake) ||
+    settings.stake < 0.01 ||
+    settings.stake > 10000
+  ) {
+    document.querySelector("#builder-feedback").textContent =
+      "Check the strategy name, duration, and stake values.";
+    return;
+  }
+  try {
+    const saved = JSON.parse(window.localStorage.getItem("vortextreder.saved-strategies") || "[]");
+    if (!Array.isArray(saved)) throw new Error("Saved strategies are not in the expected format.");
+    const next = [...saved.filter((item) => item?.name !== settings.name), settings].slice(-20);
+    window.localStorage.setItem("vortextreder.saved-strategies", JSON.stringify(next));
+    document.querySelector("#builder-feedback").textContent =
+      `Saved “${settings.name}” on this device. Settings are not sent to Deriv until you manually request a quote.`;
+    renderSavedStrategies();
+  } catch {
+    document.querySelector("#builder-feedback").textContent =
+      "Could not save strategy settings in this browser.";
+  }
+});
+document.querySelector("#saved-strategies").addEventListener("click", (event) => {
+  const button = event.target.closest("button[data-saved-strategy]");
+  if (!button) return;
+  let saved;
+  try {
+    saved = JSON.parse(window.localStorage.getItem("vortextreder.saved-strategies") || "[]");
+  } catch {
+    document.querySelector("#builder-feedback").textContent =
+      "Saved settings could not be read from this browser.";
+    return;
+  }
+  const strategy = Array.isArray(saved)
+    ? saved.find((item) => item?.name === button.dataset.savedStrategy)
+    : null;
+  if (!strategy) {
+    document.querySelector("#builder-feedback").textContent =
+      "That saved strategy is no longer available.";
+    renderSavedStrategies();
+    return;
+  }
+  if (strategy.demoOnly && selectedAccount()?.type !== "demo") {
+    const demo = accounts.find((account) => account.type === "demo" && account.status === "active");
+    if (!demo) {
+      document.querySelector("#builder-feedback").textContent =
+        "This strategy is marked for demo practice, but no active demo account is connected.";
+      return;
+    }
+    accountSelect.value = demo.id;
+    setAccountDetails();
+  }
+  document.querySelector("#strategy-name").value = strategy.name;
+  document.querySelector("#builder-contract").value = strategy.contract;
+  document.querySelector("#builder-duration").value = String(strategy.duration);
+  document.querySelector("#builder-stake").value = String(strategy.stake);
+  document.querySelector("#builder-demo-only").checked = Boolean(strategy.demoOnly);
+  document.querySelector("#builder-feedback").textContent =
+    "Settings loaded into the builder. Review them before using the manual ticket.";
+});
 quoteButton.addEventListener("click", requestQuote);
 buyButton.addEventListener("click", placeOrder);
 resolveUncertainOrderButton.addEventListener("click", resolveUncertainOrder);
@@ -672,6 +1067,9 @@ for (const selector of ["#market-select", "#contract-select", "#duration-input",
   document.querySelector(selector).addEventListener("change", resetQuote);
 }
 
+document.querySelectorAll(".risk-currency").forEach((element) => {
+  element.textContent = selectedAccount()?.currency || "USD";
+});
 if (window.location.pathname === "/callback") {
   handleDerivCallback().catch((error) => showMessage(error.message, true));
 }

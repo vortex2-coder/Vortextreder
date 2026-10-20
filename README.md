@@ -79,6 +79,30 @@ The site requests a single-use OTP from Deriv and opens the returned
 authenticated WebSocket directly, without sending the user's access token to
 browser code.
 
+## Trading terminal tools
+
+After connecting, the terminal provides:
+
+- **Digit lab:** live tick stream, rolling last-digit frequencies, parity and
+  threshold summaries, recent digit stream, and a price trace. These summarize
+  observed data and are not forecasts.
+- **Strategy library and builder:** manual Rise/Fall templates and locally
+  saved ticket settings. Loading a template only fills the manual ticket; it
+  never runs or submits an order.
+- **Replay lab:** a simple adjacent-tick direction comparison using ticks
+  observed in the current browser session. It is not an Options contract
+  backtest and does not estimate payouts or profit.
+- **Risk planner:** estimates a stake ladder and session limits from values the
+  user enters. The selected account balance can be copied into the form, but
+  the estimates do not prevent losses.
+- **Guides:** account connection, market statistics, manual quotes, and risk
+  notes.
+
+Market tools use a public Deriv tick stream. They are not connected to an
+unattended order engine. The only order path remains the existing manual quote
+and explicit confirmation flow. Vortextreder does not accept customer API
+tokens for copy trading or mirror trades between customer accounts.
+
 The trade panel currently offers Rise/Fall (`CALL`/`PUT`) quotes in ticks for
 live, open markets. It displays Deriv's quote and maximum purchase price before
 an order is possible. Every order requires a separate click; real-account orders

@@ -478,6 +478,430 @@ h2 {
   border-top: 1px solid var(--line);
 }
 
+.terminal-nav {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  margin: 24px 0 0;
+  padding: 0 0 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.terminal-tab {
+  flex: 0 0 auto;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  color: #53645b;
+  background: transparent;
+  font: 600 12px "DM Sans", sans-serif;
+  cursor: pointer;
+}
+
+.terminal-tab:hover,
+.terminal-tab.is-active {
+  border-color: #cde2d5;
+  color: #126847;
+  background: #eff8f2;
+}
+
+.tool-view {
+  padding: 28px 0 8px;
+}
+
+.tool-heading,
+.tool-card-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.tool-heading {
+  margin-bottom: 20px;
+}
+
+.tool-heading h2 {
+  margin-bottom: 7px;
+}
+
+.tool-heading .eyebrow {
+  margin-bottom: 8px;
+}
+
+.tool-heading .muted-copy {
+  max-width: 700px;
+}
+
+.analysis-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 18px 0;
+}
+
+.analysis-summary > div,
+.risk-metrics > div {
+  display: grid;
+  gap: 6px;
+  padding: 15px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fafcfb;
+}
+
+.analysis-summary span,
+.risk-metrics span {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.analysis-summary strong,
+.risk-metrics strong {
+  font: 700 18px "Manrope", sans-serif;
+}
+
+.analysis-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.tool-card {
+  min-width: 0;
+  padding: 19px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: #fff;
+}
+
+.tool-card h3 {
+  margin-bottom: 0;
+  font-size: 15px;
+}
+
+.tool-card-heading {
+  margin-bottom: 17px;
+}
+
+.tool-card-heading > span {
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.digit-bars {
+  display: grid;
+  gap: 8px;
+}
+
+.digit-bar-row {
+  display: grid;
+  grid-template-columns: 18px minmax(40px, 1fr) 44px;
+  align-items: center;
+  gap: 10px;
+  color: #53645b;
+  font-size: 11px;
+}
+
+.digit-bar-row > span:last-child {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.digit-bar-track {
+  display: block;
+  height: 8px;
+  overflow: hidden;
+  border-radius: 20px;
+  background: #edf2ee;
+}
+
+.digit-bar-fill {
+  display: block;
+  min-width: 2px;
+  height: 100%;
+  border-radius: inherit;
+  background: #91b5a0;
+}
+
+.digit-bar-fill.is-current {
+  background: #167d59;
+}
+
+.stat-pills {
+  margin-top: 16px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.inline-field {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.inline-field select {
+  min-height: 31px;
+  padding: 0 8px;
+  border: 1px solid #cfd9d2;
+  border-radius: 5px;
+  background: white;
+}
+
+.pattern-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 12px 0;
+}
+
+.pattern-pair > div {
+  display: grid;
+  gap: 4px;
+  padding: 13px;
+  border-radius: 7px;
+  background: #f5f8f5;
+}
+
+.pattern-pair strong {
+  font: 700 19px "Manrope", sans-serif;
+}
+
+.pattern-pair span {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.digit-stream {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 18px;
+}
+
+.stream-digit {
+  display: grid;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  border-radius: 50%;
+  font-size: 10px;
+}
+
+.stream-digit.is-even {
+  color: #136b4b;
+  background: #e8f5ed;
+}
+
+.stream-digit.is-odd {
+  color: #6654a1;
+  background: #f0edfa;
+}
+
+.chart-tool-card {
+  grid-column: 1 / -1;
+}
+
+.live-chart {
+  display: block;
+  width: 100%;
+  height: 180px;
+  overflow: visible;
+  background: repeating-linear-gradient(to bottom, transparent 0, transparent 44px, #edf2ee 45px);
+}
+
+.live-chart + .muted-copy {
+  margin-top: 12px;
+  font-size: 11px;
+}
+
+.strategy-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.strategy-card {
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+}
+
+.strategy-card h3 {
+  margin: 12px 0 8px;
+}
+
+.strategy-card p {
+  flex: 1;
+  margin-bottom: 18px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.strategy-tag {
+  padding: 5px 8px;
+  border-radius: 20px;
+  color: #176747;
+  background: #eaf5ef;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.safety-note {
+  margin: 16px 0 0;
+  color: #80612d;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.builder-form,
+.risk-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: end;
+  gap: 16px;
+}
+
+.builder-form > .check-field,
+.builder-form > button,
+.builder-form > .tool-feedback,
+.builder-form > .saved-strategies-wrap {
+  grid-column: 1 / -1;
+}
+
+.saved-strategies-wrap h3 {
+  margin-bottom: 10px;
+}
+
+.saved-strategies {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.saved-strategy {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 5px 12px;
+  padding: 11px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+}
+
+.saved-strategy strong {
+  overflow-wrap: anywhere;
+  font-size: 12px;
+}
+
+.saved-strategy > span {
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.saved-strategy button {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+}
+
+.check-field {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--ink);
+  font-size: 12px;
+}
+
+.check-field input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--green);
+}
+
+.tool-feedback {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.replay-card .analysis-summary {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 0;
+}
+
+.replay-card .secondary-button {
+  margin: 4px 0 14px;
+}
+
+.risk-planner {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.8fr) minmax(0, 1.2fr);
+  align-items: start;
+  gap: 16px;
+}
+
+.risk-form {
+  grid-template-columns: 1fr;
+}
+
+.risk-results h3 {
+  margin-bottom: 16px;
+}
+
+.risk-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.risk-results h4 {
+  margin: 20px 0 10px;
+  font-size: 12px;
+}
+
+.risk-ladder {
+  display: grid;
+  gap: 7px;
+}
+
+.risk-ladder > div {
+  display: grid;
+  grid-template-columns: 35px 1fr 1fr;
+  gap: 8px;
+  padding: 9px;
+  border-radius: 6px;
+  background: #f5f8f5;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.risk-ladder > div span:last-child {
+  text-align: right;
+}
+
+.guide-list {
+  display: grid;
+  gap: 9px;
+}
+
+.guide-list summary {
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.guide-list details p {
+  margin: 14px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
 .trade-heading {
   align-items: center;
 }
@@ -727,6 +1151,26 @@ footer {
   .account-controls,
   .trade-fields,
   .quote-details {
+    grid-template-columns: 1fr;
+  }
+
+  .analysis-grid,
+  .strategy-grid,
+  .risk-planner {
+    grid-template-columns: 1fr;
+  }
+
+  .analysis-summary,
+  .replay-card .analysis-summary,
+  .risk-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .builder-form {
+    grid-template-columns: 1fr;
+  }
+
+  .saved-strategies {
     grid-template-columns: 1fr;
   }
 

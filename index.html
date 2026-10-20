@@ -9,6 +9,7 @@
     />
     <title>Vortextreder | Deriv Options</title>
     <link rel="stylesheet" href="/styles.css" />
+    <script src="/analytics.js" defer></script>
     <script src="/app.js" defer></script>
   </head>
   <body>
@@ -118,6 +119,17 @@
           </p>
         </div>
 
+        <nav class="terminal-nav" aria-label="Trading tools">
+          <button class="terminal-tab is-active" data-view="trade" type="button">Trade</button>
+          <button class="terminal-tab" data-view="analytics" type="button">Digit lab</button>
+          <button class="terminal-tab" data-view="strategies" type="button">Strategy library</button>
+          <button class="terminal-tab" data-view="builder" type="button">Strategy builder</button>
+          <button class="terminal-tab" data-view="speed" type="button">Replay lab</button>
+          <button class="terminal-tab" data-view="risk" type="button">Risk planner</button>
+          <button class="terminal-tab" data-view="learn" type="button">Guides</button>
+        </nav>
+
+        <section class="tool-view" data-panel="trade">
         <section class="trade-panel" id="trading-panel" aria-labelledby="trading-title">
           <div class="dashboard-heading trade-heading">
             <div>
@@ -189,6 +201,102 @@
           </section>
           <p class="trade-message" id="trade-message" role="status" aria-live="polite" hidden></p>
         </section>
+        </section>
+
+        <section class="tool-view" data-panel="analytics" hidden>
+          <div class="tool-heading">
+            <div>
+              <p class="eyebrow">LIVE MARKET TOOL</p>
+              <h2>Digit lab</h2>
+              <p class="muted-copy">Explore recent last-digit frequencies and price movement for the selected market. Historical frequencies do not predict the next result.</p>
+            </div>
+            <span class="connection-status" id="analysis-status">Waiting for a market</span>
+          </div>
+          <div class="analysis-summary">
+            <div><span>Latest price</span><strong id="analysis-price">—</strong></div>
+            <div><span>Current last digit</span><strong id="analysis-current-digit">—</strong></div>
+            <div><span>Ticks observed</span><strong id="analysis-tick-count">0</strong></div>
+          </div>
+          <div class="analysis-grid">
+            <article class="tool-card">
+              <div class="tool-card-heading"><h3>Digit distribution</h3><span>Rolling sample</span></div>
+              <div class="digit-bars" id="digit-bars" aria-live="polite"></div>
+              <div class="stat-pills" id="digit-extremes"></div>
+            </article>
+            <article class="tool-card">
+              <div class="tool-card-heading"><h3>Patterns</h3><label class="inline-field">Above <select id="digit-threshold"><option value="4">4</option><option value="5" selected>5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option></select></label></div>
+              <div class="pattern-pair"><div><strong id="even-percent">—</strong><span>Even</span></div><div><strong id="odd-percent">—</strong><span>Odd</span></div></div>
+              <div class="pattern-pair"><div><strong id="over-percent">—</strong><span id="over-label">Over 5</span></div><div><strong id="under-percent">—</strong><span id="under-label">5 or under</span></div></div>
+              <div class="digit-stream" id="digit-stream" aria-label="Recent last digits"></div>
+            </article>
+            <article class="tool-card chart-tool-card">
+              <div class="tool-card-heading"><h3>Recent price movement</h3><span>Live ticks</span></div>
+              <svg class="live-chart" id="live-chart" viewBox="0 0 640 180" role="img" aria-label="Recent market tick prices"></svg>
+              <p class="muted-copy">Chart is a visual aid, not a trading signal.</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="tool-view" data-panel="strategies" hidden>
+          <div class="tool-heading">
+            <div><p class="eyebrow">MANUAL TEMPLATES</p><h2>Strategy library</h2><p class="muted-copy">Load a template into the manual ticket to review a quote yourself. Templates never place orders or run automatically.</p></div>
+          </div>
+          <div class="strategy-grid">
+            <article class="tool-card strategy-card"><span class="strategy-tag">Rise / Fall</span><h3>Single-step direction</h3><p>Set a small fixed stake and a short tick duration. Assess each quote individually.</p><button class="secondary-button strategy-load" data-contract="CALL" data-duration="5" type="button">Use settings</button></article>
+            <article class="tool-card strategy-card"><span class="strategy-tag">Rise / Fall</span><h3>Longer observation</h3><p>Use a longer duration for a single directional contract, without increasing after losses.</p><button class="secondary-button strategy-load" data-contract="PUT" data-duration="10" type="button">Use settings</button></article>
+            <article class="tool-card strategy-card"><span class="strategy-tag">Risk first</span><h3>Fixed-stake practice</h3><p>Keep each practice stake fixed and use the risk planner to define a session limit.</p><button class="secondary-button" data-open-view="risk" type="button">Open risk planner</button></article>
+          </div>
+          <p class="safety-note">No strategy can guarantee a profit. Vortextreder does not enable martingale or unattended bot execution.</p>
+        </section>
+
+        <section class="tool-view" data-panel="builder" hidden>
+          <div class="tool-heading"><div><p class="eyebrow">MANUAL STRATEGY DESIGN</p><h2>Strategy builder</h2><p class="muted-copy">Create a reusable checklist for the manual trade ticket. This builder saves settings only; it does not automate orders.</p></div></div>
+          <form class="tool-card builder-form" id="strategy-form">
+            <label class="field"><span>Strategy name</span><input id="strategy-name" maxlength="40" value="My practice setup" required /></label>
+            <label class="field"><span>Contract direction</span><select id="builder-contract"><option value="CALL">Rise</option><option value="PUT">Fall</option></select></label>
+            <label class="field"><span>Duration (ticks)</span><input id="builder-duration" type="number" min="5" max="1000" step="1" value="5" required /></label>
+            <label class="field"><span>Stake (<span id="builder-currency">account currency</span>)</span><input id="builder-stake" type="number" min="0.01" max="10000" step="0.01" value="1" required /></label>
+            <label class="check-field"><input id="builder-demo-only" type="checkbox" checked /><span>Use demo accounts only for practice</span></label>
+            <button class="primary-button" type="submit">Save strategy settings</button>
+            <p class="tool-feedback" id="builder-feedback" role="status" aria-live="polite"></p>
+            <div class="saved-strategies-wrap"><h3>Saved on this device</h3><div class="saved-strategies" id="saved-strategies"></div></div>
+          </form>
+        </section>
+
+        <section class="tool-view" data-panel="speed" hidden>
+          <div class="tool-heading"><div><p class="eyebrow">HISTORICAL REPLAY</p><h2>Replay lab</h2><p class="muted-copy">Review simple direction-following results using ticks observed in this browser session. This is not a contract backtest and does not model payouts, spreads, or execution.</p></div></div>
+          <div class="tool-card replay-card">
+            <div class="analysis-summary"><div><span>Ticks available</span><strong id="replay-tick-count">0</strong></div><div><span>Directional matches</span><strong id="replay-wins">—</strong></div><div><span>Directional misses</span><strong id="replay-losses">—</strong></div><div><span>Historical match rate</span><strong id="replay-rate">—</strong></div></div>
+            <button class="secondary-button" id="run-replay" type="button" disabled>Analyze observed ticks</button>
+            <p class="tool-feedback" id="replay-feedback" role="status" aria-live="polite">Select a market and collect at least three live ticks to enable replay.</p>
+          </div>
+        </section>
+
+        <section class="tool-view" data-panel="risk" hidden>
+          <div class="tool-heading"><div><p class="eyebrow">SESSION LIMITS</p><h2>Risk planner</h2><p class="muted-copy">Plan a stake and loss limit from the balance and limits you enter. These estimates do not make trading safe or profitable.</p></div></div>
+          <div class="risk-planner">
+            <form class="tool-card risk-form" id="risk-form">
+              <label class="field"><span>Account balance (<span class="risk-currency">USD</span>)</span><input id="risk-balance" type="number" min="0.01" step="0.01" value="100" required /></label>
+              <button class="secondary-button" id="use-account-balance" type="button">Use selected account balance</button>
+              <label class="field"><span>Maximum session loss (%)</span><input id="risk-percent" type="number" min="1" max="50" step="1" value="5" required /></label>
+              <label class="field"><span>Losses to plan for</span><input id="risk-loss-count" type="number" min="1" max="10" step="1" value="3" required /></label>
+              <label class="field"><span>Stake multiplier after loss</span><input id="risk-martingale" type="number" min="1" max="2" step="0.1" value="1" required /></label>
+              <label class="field"><span>Take-profit target (% of loss limit)</span><input id="risk-take-profit-percent" type="number" min="1" max="100" step="1" value="50" required /></label>
+            </form>
+            <div class="tool-card risk-results"><h3>Planning estimates</h3><div class="risk-metrics"><div><span>Suggested starting stake</span><strong id="risk-starting-stake">—</strong></div><div><span>Session loss limit</span><strong id="risk-stop-loss">—</strong></div><div><span>Take-profit target</span><strong id="risk-take-profit">—</strong></div></div><h4>Planned stake ladder</h4><div class="risk-ladder" id="risk-ladder"></div><p class="safety-note">Increasing stakes after losses can accelerate losses. A stop target is a planning aid, not a guarantee that orders will close at that value.</p></div>
+          </div>
+        </section>
+
+        <section class="tool-view" data-panel="learn" hidden>
+          <div class="tool-heading"><div><p class="eyebrow">LEARN BEFORE YOU TRADE</p><h2>Guides</h2><p class="muted-copy">Short notes for using the manual terminal safely.</p></div></div>
+          <div class="guide-list">
+            <details class="tool-card"><summary>Connect an account</summary><p>Use the Deriv authorization button, review the requested permissions, and return to Vortextreder. Verify the displayed account ID and type before requesting quotes.</p></details>
+            <details class="tool-card"><summary>Read digit statistics</summary><p>Digit frequencies describe only the sample observed. They are historical summaries, not forecasts, and do not change the probability of the next independent tick.</p></details>
+            <details class="tool-card"><summary>Review a manual quote</summary><p>Choose a market and contract, request a quote, check its expiry and maximum price, and submit only if you intend to. Real-account orders use real money.</p></details>
+            <details class="tool-card"><summary>Use a session loss limit</summary><p>Set limits before trading and stop when a limit is reached. Do not raise stakes to recover losses; no strategy removes the risk of losing your stake.</p></details>
+          </div>
+        </section>
+
       </section>
 
       <section class="features" id="how-it-works">
