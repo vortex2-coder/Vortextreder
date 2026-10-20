@@ -190,7 +190,7 @@ function setAccountDetails() {
     typeof account.balance === "number"
       ? ` · Balance ${formatCurrency(account.balance, account.currency)}`
       : "";
-  accountNote.textContent = `${typeLabel} · ${account.currency}${balanceText}`;
+  accountNote.textContent = `${typeLabel} · ${account.currency} · ${account.id}${balanceText}`;
   realAccountWarning.hidden = account.type !== "real";
   const accountIsLocked = uncertainAccounts.has(account.id);
   uncertainOrderWarning.hidden = !accountIsLocked;
@@ -649,7 +649,9 @@ async function signOut() {
     connectButton.disabled = false;
     accountSelect.replaceChildren();
     resetQuote();
-    showMessage("You have signed out of Vortextreder. To revoke this app's Deriv access entirely, remove it from your Deriv account settings.");
+    showMessage(
+      "You have signed out of Vortextreder. To connect a different Deriv profile, also sign out of Deriv in this browser, then connect again. To revoke this app's access entirely, remove it from your Deriv account settings.",
+    );
   } catch (error) {
     showMessage(error.message, true);
   }

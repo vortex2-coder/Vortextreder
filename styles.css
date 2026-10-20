@@ -335,6 +335,47 @@ h2 {
   font-size: 24px;
 }
 
+.connection-steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 20px 0 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: connection-step;
+}
+
+.connection-steps li {
+  display: grid;
+  gap: 5px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  counter-increment: connection-step;
+}
+
+.connection-steps li::before {
+  color: var(--green);
+  content: "0" counter(connection-step);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.connection-steps strong {
+  font-size: 12px;
+}
+
+.connection-steps span {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.connect-button {
+  flex: 0 0 auto;
+}
+
 .dashboard-panel {
   width: min(1160px, calc(100% - 64px));
   margin: 32px auto;
@@ -668,6 +709,10 @@ footer {
     width: calc(100% - 36px);
     margin-top: 30px;
     padding: 24px;
+  }
+
+  .connection-steps {
+    grid-template-columns: 1fr;
   }
 
   .dashboard-panel {

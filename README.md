@@ -62,10 +62,22 @@ codes in source control or browser logs.
 
 ## Account access and trading
 
-After sign-in, users can select their own demo or real Options account. Demo is
-selected by default when available. The site requests a single-use OTP from
-Deriv and opens the returned authenticated WebSocket directly, without sending
-the user's access token to browser code.
+Each user starts from Vortextreder and chooses **Connect my Deriv account**.
+Deriv handles that user's sign-in and authorization, then redirects back to the
+registered callback. Signing in to Deriv directly does not start this redirect
+flow. After authorization, users can select their own demo or real Options
+account; demo is selected by default when available. The account ID is shown
+with the selected account so users can verify it before requesting a quote.
+
+If Deriv is already signed in to the wrong profile in the same browser, sign
+out of Vortextreder and Deriv, then start the connection again from
+Vortextreder. Each browser session is associated with the Deriv profile that
+authorized it; the app does not choose or switch Deriv identities on a user's
+behalf.
+
+The site requests a single-use OTP from Deriv and opens the returned
+authenticated WebSocket directly, without sending the user's access token to
+browser code.
 
 The trade panel currently offers Rise/Fall (`CALL`/`PUT`) quotes in ticks for
 live, open markets. It displays Deriv's quote and maximum purchase price before

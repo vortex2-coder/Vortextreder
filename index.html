@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="A starter website for a Deriv-powered trading experience."
+      content="Connect your own Deriv account, choose a demo or real Options account, and trade from Vortextreder."
     />
     <title>Vortextreder | Deriv Options</title>
     <link rel="stylesheet" href="/styles.css" />
@@ -24,15 +24,15 @@
       <section class="hero">
         <div class="hero-copy">
           <p class="eyebrow"><span class="status-dot"></span> YOUR MARKETS, YOUR WAY</p>
-          <h1>A clearer way to explore the markets.</h1>
+          <h1>Trade Options with your Deriv account.</h1>
           <p class="hero-description">
-            View your Deriv Options accounts, request live quotes, and place
-            trades with a clear choice between demo and real funds.
+            Connect your own Deriv account, choose demo or real funds, and
+            request quotes and place Options trades here on Vortextreder.
           </p>
           <a class="primary-button" href="#get-started">
-            Get started <span aria-hidden="true">↗</span>
+            Connect your account <span aria-hidden="true">↗</span>
           </a>
-          <p class="fine-print">The chart is illustrative. Live quotes are requested from Deriv after sign-in.</p>
+          <p class="fine-print">Sign-in and permission approval happen securely on Deriv. You return here to trade.</p>
         </div>
         <div class="market-card" aria-label="Market overview illustration">
           <div class="market-card-top">
@@ -75,41 +75,23 @@
         </div>
       </section>
 
-      <section class="features" id="how-it-works">
-        <div class="section-heading">
-          <p class="eyebrow">BUILT AROUND YOU</p>
-          <h2>Trading, without the clutter.</h2>
-        </div>
-        <div class="feature-grid">
-          <article class="feature">
-            <span class="feature-icon" aria-hidden="true">↗</span>
-            <h3>Live Deriv quotes</h3>
-            <p>Choose an open Options market and review a current Deriv quote before each order.</p>
-          </article>
-          <article class="feature">
-            <span class="feature-icon" aria-hidden="true">◎</span>
-            <h3>Secure Deriv sign-in</h3>
-            <p>Authorize with Deriv using OAuth and PKCE. We never ask for your password.</p>
-          </article>
-          <article class="feature">
-            <span class="feature-icon" aria-hidden="true">⌁</span>
-            <h3>Designed for clarity</h3>
-            <p>Keep key information easy to find on desktop and mobile.</p>
-          </article>
-        </div>
-      </section>
-
       <section class="connect-panel" id="get-started">
         <div>
           <p class="eyebrow">YOUR DERIV ACCOUNT</p>
-          <h2>Connect to view your accounts.</h2>
+          <h2>Connect once. Trade here.</h2>
           <p>
-            Sign in with Deriv to view your own demo and real Options accounts
-            and request live quotes. Your password stays with Deriv.
+            Each person connects their own Deriv account. Deriv handles sign-in
+            and asks you to authorize Vortextreder; after approval, it returns
+            you here to use your own Options accounts.
           </p>
+          <ol class="connection-steps">
+            <li><strong>Connect with Deriv</strong><span>Sign in and approve access on Deriv.</span></li>
+            <li><strong>Choose your account</strong><span>Select your demo or real Options account.</span></li>
+            <li><strong>Trade on this site</strong><span>Review a live quote and confirm each order.</span></li>
+          </ol>
         </div>
         <button class="primary-button connect-button" id="connect-deriv" type="button">
-          Connect Deriv <span aria-hidden="true">↗</span>
+          Connect my Deriv account <span aria-hidden="true">↗</span>
         </button>
       </section>
 
@@ -119,7 +101,8 @@
             <p class="eyebrow">ACCOUNT OVERVIEW</p>
             <h2>Your Deriv accounts</h2>
             <p class="muted-copy">
-              Only accounts belonging to the Deriv user who signed in are shown here.
+              These are the Options accounts returned for the Deriv profile you authorized.
+              Check the selected account ID before requesting a quote.
             </p>
           </div>
           <button class="secondary-button" id="disconnect-deriv" type="button">Sign out</button>
@@ -206,6 +189,30 @@
           </section>
           <p class="trade-message" id="trade-message" role="status" aria-live="polite" hidden></p>
         </section>
+      </section>
+
+      <section class="features" id="how-it-works">
+        <div class="section-heading">
+          <p class="eyebrow">BUILT AROUND YOU</p>
+          <h2>Trading, without the clutter.</h2>
+        </div>
+        <div class="feature-grid">
+          <article class="feature">
+            <span class="feature-icon" aria-hidden="true">↗</span>
+            <h3>Live Deriv quotes</h3>
+            <p>Choose an open Options market and review a current Deriv quote before each order.</p>
+          </article>
+          <article class="feature">
+            <span class="feature-icon" aria-hidden="true">◎</span>
+            <h3>Your account, your permission</h3>
+            <p>Deriv securely handles sign-in and authorization. Vortextreder never asks for your password.</p>
+          </article>
+          <article class="feature">
+            <span class="feature-icon" aria-hidden="true">⌁</span>
+            <h3>Demo or real</h3>
+            <p>Select the account you intend to use and confirm each order before it is sent to Deriv.</p>
+          </article>
+        </div>
       </section>
 
       <p class="risk-note">
