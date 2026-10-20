@@ -1,6 +1,7 @@
 const http = require("node:http");
 const fs = require("node:fs");
 const path = require("node:path");
+const { createTokenHandler } = require("./api/oauth/token");
 
 const root = __dirname;
 const files = {
@@ -11,8 +12,39 @@ const files = {
   "/app.js": ["app.js", "text/javascript; charset=utf-8"],
 };
 
-const server = http.createServer((request, response) => {
+const tokenHandler = createTokenHandler({
+  expectedRedirectUri: `http://localhost:${process.env.PORT || 4173}/callback`,
+});
+
+const server = http.createServer(async (request, response) => {
   const pathname = new URL(request.url, "http://localhost").pathname;
+
+  if (pathname === "/api/oauth/token") {
+    if (request.method !== "POST") {
+      await tokenHandler(request, response);
+      return;
+    }
+
+    let rawBody = "";
+    for await (const chunk of request) {
+      rawBody += chunk;
+      if (rawBody.length > 8192) {
+        response.writeHead(413, { "Content-Type": "application/json; charset=utf-8" });
+        response.end(JSON.stringify({ error: "Request body is too large." }));
+        return;
+      }
+    }
+
+    try {
+      request.body = JSON.parse(rawBody);
+    } catch {
+      request.body = null;
+    }
+
+    await tokenHandler(request, response);
+    return;
+  }
+
   const file = files[pathname];
 
   if (!file || (request.method !== "GET" && request.method !== "HEAD")) {

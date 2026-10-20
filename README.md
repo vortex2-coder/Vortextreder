@@ -17,11 +17,10 @@ URL in the Deriv API dashboard:
 http://localhost:4173/callback
 ```
 
-The local callback route is only a placeholder. It does not exchange
-authorization codes, store tokens, connect a Deriv account, or place trades.
-Implement the OAuth Authorization Code flow with PKCE and server-side token
-exchange before enabling sign-in. Keep credentials and tokens out of source
-control and browser logs.
+The OAuth callback validates state and PKCE, then exchanges the short-lived
+authorization code from a Vercel function. The current prototype deliberately
+discards the returned tokens; it does not persist credentials, maintain a
+signed-in session, or place trades.
 
 The app registration form's trade markup is separate from partner/referral
 commissions. Confirm the applicable Deriv terms and earnings model before
@@ -42,8 +41,24 @@ form the callback URL:
 https://YOUR-VERCEL-DOMAIN/callback
 ```
 
-Register that exact URL with Deriv. The callback is currently a placeholder: it
-does not exchange authorization codes, store tokens, connect accounts, or place
-trades. A Vercel serverless function will be needed for server-side token
-exchange; never expose client secrets or tokens in source control or browser
-logs.
+Register that exact URL with Deriv. The current deployment is configured for
+`https://vortextreder.vercel.app/callback`. Do not expose tokens or authorization
+codes in source control or browser logs.
+
+## OAuth test
+
+The site uses Deriv's OAuth Authorization Code flow with PKCE. The client ID is
+public; no client secret is stored in the repository. The callback sends the
+authorization code and PKCE verifier to `/api/oauth/token`, which exchanges
+them with Deriv and returns only a success result. Access and refresh tokens
+are intentionally discarded. This validates sign-in only and does not enable
+trading; real account features need a secure session and token lifecycle design.
+
+Run the local server with `node server.js`, then run the focused checks with:
+
+```powershell
+node --test test/oauth-token.test.js
+```
+
+Local tests mock Deriv's token endpoint. A real OAuth approval test must use the
+deployed HTTPS site and the registered callback URL.

@@ -32,7 +32,7 @@
           <a class="primary-button" href="#get-started">
             Get started <span aria-hidden="true">↗</span>
           </a>
-          <p class="fine-print">A prototype experience. Sign-in is not enabled yet.</p>
+          <p class="fine-print">A prototype experience. Connect Deriv below to test secure sign-in.</p>
         </div>
         <div class="market-card" aria-label="Market overview illustration">
           <div class="market-card-top">
@@ -88,8 +88,8 @@
           </article>
           <article class="feature">
             <span class="feature-icon" aria-hidden="true">◎</span>
-            <h3>Your account, connected</h3>
-            <p>Sign in with Deriv when account connection is configured.</p>
+            <h3>Secure Deriv sign-in</h3>
+            <p>Authorize with Deriv using OAuth and PKCE. We never ask for your password.</p>
           </article>
           <article class="feature">
             <span class="feature-icon" aria-hidden="true">⌁</span>
@@ -102,13 +102,15 @@
       <section class="connect-panel" id="get-started">
         <div>
           <p class="eyebrow">EARLY ACCESS</p>
-          <h2>We’re getting things ready.</h2>
+          <h2>Connect your Deriv account.</h2>
           <p>
-            Deriv sign-in will be added after the app is registered and its
-            permissions are configured.
+            Sign in securely with Deriv to test account authorization. This
+            prototype does not place trades or retain your access token.
           </p>
         </div>
-        <span class="setup-badge">Setup in progress</span>
+        <button class="primary-button connect-button" id="connect-deriv" type="button">
+          Connect Deriv <span aria-hidden="true">↗</span>
+        </button>
       </section>
 
       <p class="risk-note">
@@ -116,7 +118,7 @@
         some or all of your investment. This website is an independent prototype
         and is not affiliated with Deriv.
       </p>
-      <section class="callback-message" id="callback-message" aria-live="polite" hidden></section>
+      <section class="callback-message" id="callback-message" aria-live="polite" role="status" hidden></section>
     </main>
 
     <footer>

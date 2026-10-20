@@ -158,6 +158,12 @@ h1 {
   background: #106547;
 }
 
+.connect-button {
+  border: 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+
 .fine-print {
   margin: 14px 0 0;
   color: #7b8781;
@@ -351,6 +357,12 @@ h2 {
   color: #21563e;
   background: #eff9f3;
   font-size: 14px;
+}
+
+.callback-message.is-error {
+  border-color: #f0c7c3;
+  color: #812f27;
+  background: #fff2f0;
 }
 
 footer {
